@@ -1,0 +1,43 @@
+---
+title: "AM_dept_changes_registration"
+author: "Beau Meche"
+date: "April 10, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+library(readxl)
+library(janitor)
+library(gt)
+library(fs)
+library(ggplot2)
+```
+
+```{r download_stuff, echo=FALSE, message=FALSE}
+download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_3.22.19.xlsx", mode = "wb", destfile = "spring_2019_data.xlsx")
+
+
+
+download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_03.06.18.xlsx", mode = "wb", destfile = "spring_2018_data.xlsx")
+
+s_2019 <- read_xlsx("spring_2019_data.xlsx", skip = 3) %>% clean_names()
+s_2018 <- read_xlsx("spring_2018_data.xlsx", skip = 3) %>% clean_names()
+```
+
+
+```{r graphic_creation, echo=FALSE}
+w_2019 <- s_2019 %>% 
+  filter(!is.na(u_grad) & !is.na(instructor_full_name)) %>% 
+  filter(course_department == "Applied Mathematics") %>% 
+  select(instructor_full_name, u_grad)
+
+w_2018 <- s_2018 %>% 
+  filter(!is.na(u_grad) & !is.na(course_name)) %>% 
+  filter(course_department == "Applied Mathematics") %>% 
+  select(instructor_full_name, u_grad)
+
+```
+
