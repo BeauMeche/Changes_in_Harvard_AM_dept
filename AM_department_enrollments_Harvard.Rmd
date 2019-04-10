@@ -13,32 +13,62 @@ library(readxl)
 library(janitor)
 library(gt)
 library(ggplot2)
+library(ggthemes)
 ```
 
 ```{r download_stuff, echo=FALSE, message=FALSE}
+# grab both data sets from the Registrar, thankfully in MS Excel form, assign it
+# a name and somewhere to go. We don't need to worry much about file updates,
+# but this is preferable to command line file manipulation.
+
 download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_3.22.19.xlsx", mode = "wb", destfile = "spring_2019_data.xlsx")
 
-
-
 download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_03.06.18.xlsx", mode = "wb", destfile = "spring_2018_data.xlsx")
+
+# read in the data and name it accorddingly so that you don't confuse values.
+# This is key because I want to measure a percent change; a goof here and my
+# calculations will be backwards.
+
+# Cleaning names just makes life easier later, take the 5 seconds to use it
 
 s_2019 <- read_xlsx("spring_2019_data.xlsx", skip = 3) %>% clean_names()
 s_2018 <- read_xlsx("spring_2018_data.xlsx", skip = 3) %>% clean_names()
 ```
 
 ```{r graphic_1, echo=FALSE}
-w_2019 <- s_2019 %>% 
-  filter(!is.na(u_grad) & !is.na(instructor_full_name)) %>% 
+# skinny data is good data, so before I join the sets together I want to only
+# join what I will look at. While I'm trimming, I find it useful to make sure to
+# remove missing points in the data.
+
+# Specifically, I played around with instructor names and course names. I
+# orignally wanted to find the most popular professor shown by greatest increase
+# in attendance, but too many people did that according to the links posted. I
+# am studying AM:Econ, so I found this interesting also.
+
+am_2019 <- s_2019 %>% 
+  filter(!is.na(u_grad) & !is.na(instructor_full_name) & !is.na(course_name)) %>% 
   filter(course_department == "Applied Mathematics") %>% 
   select(instructor_full_name, u_grad, course_name)
 
-w_2018 <- s_2018 %>% 
-  filter(!is.na(u_grad) & !is.na(course_name)) %>% 
+am_2018 <- s_2018 %>% 
+  filter(!is.na(u_grad) & !is.na(course_name) & !is.na(course_name)) %>% 
   filter(course_department == "Applied Mathematics") %>% 
   select(instructor_full_name, u_grad, course_name)
 
-joint <- inner_join(w_2019, w_2018, by = "course_name", 
+# inner_join merges only where the frames have matching values, so joining by
+# coursename seemed logical so as to avoid screwy values for discontinued,
+# renamed, or new courses that are irrelevant to this query. 
+
+# Suffixes are handy for clarity and accuracy, use them
+
+joint <- inner_join(am_2019, am_2018, by = "course_name", 
                     suffix = c(".19", ".18"))
+
+# take the joined data and calculate, for each class, the change in undergrad
+# attendance from 2018-19. Didn't multiply by 100 because the formatting later
+# does this for me.
+
+# While here, make sure the calculation didn't have any void or weird values
 
 delta_AM <- joint %>% 
   
@@ -48,27 +78,47 @@ delta_AM <- joint %>%
 
   arrange(desc(delta)) %>% 
   
+  # I grabbed the top 15 because the graphic seemed excessive beyond this number
+  
   head(15) %>% 
+  
+  # make the plot!!! plan: make a col. chart vertically and accurately first,
+  # then flip it; otherwise there is much confusion to be had
   
   ggplot(aes(reorder(course_name, delta), y = delta, fill = delta)) +
   
+  
   geom_col(show.legend = TRUE) +
+  
+  # choose a color scheme / range
   
  scale_fill_gradient2(midpoint = 0, mid = "orange", high = "green", low = "red") +
   
-  theme(legend.position = "bottomleft") +
+  # I chose this theme becuase it highlighted the cross-hash grid lines and
+  # emphasized the x-axis labels. I prefer this personally because I find the
+  # lines hard to follow often as a reader.
   
-  theme_linedraw() +
+  theme_igray() +
+  
+  # flip the coordinates for "better" visual effect. Negative is naturally left
+  # or back
   
   coord_flip() +
   
+  # format as percentages, this converts our decimals from "delta" calculations
+  
   scale_y_continuous(labels = scales::percent) +
+  
+  # label all the things when possible
   
   labs(y = "Percent Change in Enrollment", 
        x = "", 
        title = "15 Most Dynamic Harvard Applied Math Courses", 
        subtitle = "Spring Semester Comparison: 2018-2019 \nAll courses offered in both terms.", 
        caption = "Source: Harvard Registrar") + 
+  
+  # finally figured out legend labeling!!!! Hence, I made it something sensible
+  # and not "delta", though this makes sense for the A.M. folks I suppose.
   
   guides(fill=guide_legend(title="Factor of Change", reverse = TRUE))
   
