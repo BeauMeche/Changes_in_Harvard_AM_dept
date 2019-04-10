@@ -39,5 +39,13 @@ w_2018 <- s_2018 %>%
   filter(course_department == "Applied Mathematics") %>% 
   select(instructor_full_name, u_grad)
 
-```
+joint <- inner_join(w_2019, w_2018, by = "instructor_full_name", 
+                    suffix = c(".19", ".18"))
+
+delta_AM <- joint %>% 
+  
+  filter(u_grad.19 == TRUE & u_grad.18 == TRUE)
+# %>% 
+#   mutate(delta = ((u_grad.18 - u_grad.19)/u_grad.18)*100)
+# ```
 
