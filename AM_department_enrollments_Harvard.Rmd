@@ -27,26 +27,46 @@ s_2019 <- read_xlsx("spring_2019_data.xlsx", skip = 3) %>% clean_names()
 s_2018 <- read_xlsx("spring_2018_data.xlsx", skip = 3) %>% clean_names()
 ```
 
-
-```{r graphic_creation, echo=FALSE}
-
+```{r graphic_1, echo=FALSE}
 w_2019 <- s_2019 %>% 
   filter(!is.na(u_grad) & !is.na(instructor_full_name)) %>% 
   filter(course_department == "Applied Mathematics") %>% 
-  select(instructor_full_name, u_grad)
+  select(instructor_full_name, u_grad, course_name)
 
 w_2018 <- s_2018 %>% 
   filter(!is.na(u_grad) & !is.na(course_name)) %>% 
   filter(course_department == "Applied Mathematics") %>% 
-  select(instructor_full_name, u_grad)
+  select(instructor_full_name, u_grad, course_name)
 
-joint <- inner_join(w_2019, w_2018, by = "instructor_full_name", 
+joint <- inner_join(w_2019, w_2018, by = "course_name", 
                     suffix = c(".19", ".18"))
 
 delta_AM <- joint %>% 
   
-  filter(u_grad.19 == TRUE & u_grad.18 == TRUE)
-# %>% 
-#   mutate(delta = ((u_grad.18 - u_grad.19)/u_grad.18)*100)
-# ```
+  mutate(delta = ((u_grad.19 - u_grad.18)/u_grad.18)) %>% 
+
+  filter(!is.na(delta)) %>% 
+
+  arrange(desc(delta)) %>% 
+  
+  ggplot(aes(reorder(course_name, delta), y = delta, fill = delta)) +
+  
+  geom_col(show.legend = TRUE) +
+  
+ scale_fill_gradient2(midpoint = 0, mid = "orange", high = "green", low = "red") +
+  
+  theme_linedraw() +
+  
+  coord_flip() +
+  
+  scale_y_continuous(labels = scales::percent)
+  
+  labs(y = "Percent Change in A.M. Course Enrollment", 
+       x = "")
+  
+
+delta_AM
+
+
+```
 
