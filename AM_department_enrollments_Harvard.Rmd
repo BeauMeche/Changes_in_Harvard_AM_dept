@@ -29,6 +29,7 @@ s_2018 <- read_xlsx("spring_2018_data.xlsx", skip = 3) %>% clean_names()
 
 
 ```{r graphic_creation, echo=FALSE}
+
 w_2019 <- s_2019 %>% 
   filter(!is.na(u_grad) & !is.na(instructor_full_name)) %>% 
   filter(course_department == "Applied Mathematics") %>% 
