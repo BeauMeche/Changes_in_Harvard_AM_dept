@@ -1,1 +1,1 @@
-# Changes_in_Harvard_AM_dept
+This projecct shows the trends in undergraduate enrollments in several courses offered by the amazing Harvard Applied Mathematics department. The graphic shows the spring course enrollment changes betwen spring 2018-19. 
