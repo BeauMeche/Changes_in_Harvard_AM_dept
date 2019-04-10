@@ -1,1 +1,1 @@
-This projecct shows the trends in undergraduate enrollments in several courses offered by the amazing Harvard Applied Mathematics department. The graphic shows the spring course enrollment changes betwen spring 2018-19. 
+This projecct shows the trends in undergraduate enrollments in several courses offered by the amazing Harvard Applied Mathematics department. The graphic shows the spring course enrollment changes betwen spring 2018-19. Here is the link to the published graphic online: http://rpubs.com/BeauM/AM_course_dynamics . 
