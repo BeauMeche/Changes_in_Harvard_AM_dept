@@ -1,5 +1,5 @@
 ---
-title: "AM_dept_changes_registration"
+title: "Dynamic Harvard A.M. Courses"
 author: "Beau Meche"
 date: "April 10, 2019"
 output: html_document
@@ -12,7 +12,6 @@ library(readr)
 library(readxl)
 library(janitor)
 library(gt)
-library(fs)
 library(ggplot2)
 ```
 
@@ -49,24 +48,31 @@ delta_AM <- joint %>%
 
   arrange(desc(delta)) %>% 
   
+  head(15) %>% 
+  
   ggplot(aes(reorder(course_name, delta), y = delta, fill = delta)) +
   
   geom_col(show.legend = TRUE) +
   
  scale_fill_gradient2(midpoint = 0, mid = "orange", high = "green", low = "red") +
   
+  theme(legend.position = "bottomleft") +
+  
   theme_linedraw() +
   
   coord_flip() +
   
-  scale_y_continuous(labels = scales::percent)
+  scale_y_continuous(labels = scales::percent) +
   
-  labs(y = "Percent Change in A.M. Course Enrollment", 
-       x = "")
+  labs(y = "Percent Change in Enrollment", 
+       x = "", 
+       title = "15 Most Dynamic Harvard Applied Math Courses", 
+       subtitle = "Spring Semester Comparison: 2018-2019 \nAll courses offered in both terms.", 
+       caption = "Source: Harvard Registrar") + 
+  
+  guides(fill=guide_legend(title="Factor of Change", reverse = TRUE))
   
 
 delta_AM
-
-
 ```
 
